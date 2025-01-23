@@ -17,6 +17,7 @@ import { config } from "dotenv";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import { swaggerSpec } from "./swaggerOptions.js";
 import DRC_serviceRouter from "./routes/DRC_Service_route.js";
 import rtomRouter from "./routes/RTOM_route.js";
@@ -25,6 +26,8 @@ import RORoutes from "./routes/RO_route.js";
 import serviceRouter from "./routes/Service_route.js";
 import sequenceRouter from "./routes/Sequence_route.js";
 import incidentRouter from "./routes/Incident_route.js";
+import caseRouter from "./routes/Case_route.js"
+import authRouter from "./routes/Auth.js";
 
 // Load environment variables
 config();
@@ -34,9 +37,10 @@ const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(json());
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173",credentials: true,}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
@@ -47,6 +51,8 @@ app.use("/api/sequence", sequenceRouter);
 app.use("/api/RTOM", rtomRouter);
 app.use("/api/recovery_officer", RORoutes);
 app.use("/api/incident", incidentRouter);
+app.use("/api/case", caseRouter);
+app.use("/api/auth", authRouter);
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
