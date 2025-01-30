@@ -28,6 +28,7 @@ import sequenceRouter from "./routes/Sequence_route.js";
 import incidentRouter from "./routes/Incident_route.js";
 import caseRouter from "./routes/Case_route.js"
 import authRouter from "./routes/Auth.js";
+import taskRouter from "./routes/Task_route.js";
 
 // Load environment variables
 config();
@@ -38,7 +39,6 @@ const PORT = process.env.PORT || 5000;
 // Middlewares
 app.use(json());
 app.use(cors({ origin:[ process.env.CLIENT_URL || "http://220.247.224.226:9561","http://220.247.224.226:9562","http://220.247.224.226:9563"],credentials: true,}));
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -53,6 +53,7 @@ app.use("/api/recovery_officer", RORoutes);
 app.use("/api/incident", incidentRouter);
 app.use("/api/case", caseRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/task", taskRouter);
 
 // Start Server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
