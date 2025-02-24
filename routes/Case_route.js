@@ -22,6 +22,7 @@ import {
   Open_No_Agent_Cases_Direct_LD,
   assignROToCase,
   listBehaviorsOfCaseDuringDRC,
+  updateLastRoDetails,
   // listAllActiveRosByDRCID,
   Case_Status,
   Case_List,
@@ -47,6 +48,16 @@ import {
   List_All_Batch_Details,
   Approve_Batch_or_Batches,
   Create_task_for_batch_approval,
+  List_DRC_Assign_Manager_Approval,
+  Approve_DRC_Assign_Manager_Approval,
+  Reject_DRC_Assign_Manager_Approval,
+  Create_task_for_DRC_Assign_Manager_Approval,
+  Assign_DRC_To_Case,
+  List_Case_Distribution_Details,
+  Create_Task_For_case_distribution_drc_summery,
+  List_Case_Distribution_Details_With_Rtoms,
+  List_CasesOwened_By_DRC,
+  listDRCAllCases,
 } from "../controllers/Case_controller.js";
 
 const router = Router();
@@ -813,8 +824,8 @@ router.post("/Case_Current_Status", Case_Current_Status);
  *   - name: Case Management
  *     description: Endpoints for managing and assigning Recovery Officers to cases.
  * 
- * /api/case/Assign_RO:
- *   post:
+ * /api/case/Assign_RO_To_Case:
+ *   patch:
  *     summary: Assign a Recovery Officer to cases.
  *     description: |
  *       This endpoint assigns a Recovery Officer (RO) to multiple cases. The RO must be assigned to at least one RTOM area 
@@ -837,15 +848,19 @@ router.post("/Case_Current_Status", Case_Current_Status);
  *                 items:
  *                   type: integer
  *                 description: List of case IDs to which the Recovery Officer will be assigned.
- *                 example: [101, 102, 103]
+ *                 example: [10]
  *               ro_id:
  *                 type: integer
  *                 description: Recovery Officer ID who will be assigned.
- *                 example: 10
+ *                 example: 46
  *               drc_id:
  *                 type: integer
  *                 description: The DRC ID to which the cases belong.
- *                 example: 5001
+ *                 example: 11
+ *               assigned_by:
+ *                 type: String
+ *                 description: The user assigning the Recovery Officer.
+ *                 example: "AdminUser"
  *     responses:
  *       200:
  *         description: Recovery Officer assigned successfully.
@@ -977,7 +992,7 @@ router.patch("/Assign_RO_To_Case", assignROToCase);
  *               drc_id:
  *                 type: integer
  *                 description: Unique identifier of the DRC.
- *                 example: 5001
+ *                 example: 11
  *               rtom:
  *                 type: string
  *                 description: Area name associated with the case.
@@ -985,11 +1000,11 @@ router.patch("/Assign_RO_To_Case", assignROToCase);
  *               ro_id:
  *                 type: integer
  *                 description: Recovery Officer ID responsible for the case.
- *                 example: 5
+ *                 example: 46
  *               arrears_band:
  *                 type: string
  *                 description: Arrears category for filtering cases.
- *                 example: AB-5_10
+ *                 example: AB-10_25
  *               from_date:
  *                 type: string
  *                 format: date
@@ -999,7 +1014,7 @@ router.patch("/Assign_RO_To_Case", assignROToCase);
  *                 type: string
  *                 format: date
  *                 description: End date for filtering cases.
- *                 example: "2025-01-31"
+ *                 example: "2025-07-01"
  *     responses:
  *       200:
  *         description: Cases retrieved successfully.
@@ -1022,20 +1037,20 @@ router.patch("/Assign_RO_To_Case", assignROToCase);
  *                       case_id:
  *                         type: integer
  *                         description: Unique identifier for the case.
- *                         example: 101
+ *                         example: 10
  *                       status:
  *                         type: string
  *                         description: Current status of the case.
- *                         example: "Open with Agent"
+ *                         example: "Negotiation Settle Active"
  *                       created_dtm:
  *                         type: string
  *                         format: date-time
  *                         description: Case creation date.
- *                         example: "2024-06-15T08:00:00Z"
+ *                         example: 2025-01-01T12:00:00.000+00:00
  *                       current_arreas_amount:
- *                         type: number
+ *                         type: double
  *                         description: Outstanding arrears amount.
- *                         example: 25000.50
+ *                         example: 11000.00
  *                       area:
  *                         type: string
  *                         description: RTOM area related to the case.
@@ -1043,16 +1058,16 @@ router.patch("/Assign_RO_To_Case", assignROToCase);
  *                       remark:
  *                         type: string
  *                         description: Latest remark on the case.
- *                         example: "Awaiting customer response."
+ *                         example: "Case is in negotiation."
  *                       expire_dtm:
  *                         type: string
  *                         format: date-time
  *                         description: Case expiration date.
- *                         example: "2025-01-01T00:00:00Z"
+ *                         example: 2025-05-01T12:00:00.000+00:00
  *                       ro_name:
  *                         type: string
  *                         description: Name of the assigned Recovery Officer.
- *                         example: "John Doe"
+ *                         example: "Sasindu"
  *       400:
  *         description: Validation error - Missing required fields or no filter parameters provided.
  *         content:
@@ -1125,7 +1140,7 @@ router.post("/List_Handling_Cases_By_DRC", listHandlingCasesByDRC);
 /**
  * @swagger
  * tags:
- *   - name: Case Behavior
+ *   - name: Case Management
  *     description: Endpoints for retrieving case behavior details during a specific DRC period.
  * 
  * /api/case/Case_Behavior_During_DRC:
@@ -1137,9 +1152,9 @@ router.post("/List_Handling_Cases_By_DRC", listHandlingCasesByDRC);
  *       
  *       | Version | Date       | Description                       | Changed By         |
  *       |---------|------------|-----------------------------------|--------------------|
- *       | 01      | 2025-Feb-02| Retrieve case behavior during DRC | Sasindu Srinayaka  |
+ *       | 01      | 2025-Feb-02| Retrieve case behavior during DRC era | Sasindu Srinayaka  |
  *     tags:
- *       - Case Behavior
+ *       - Case Management
  *     requestBody:
  *       required: true
  *       content:
@@ -1150,15 +1165,15 @@ router.post("/List_Handling_Cases_By_DRC", listHandlingCasesByDRC);
  *               case_id:
  *                 type: integer
  *                 description: Unique identifier of the case.
- *                 example: 101
+ *                 example: 10
  *               drc_id:
  *                 type: integer
  *                 description: Unique identifier of the DRC.
- *                 example: 5001
+ *                 example: 11
  *               ro_id:
  *                 type: integer
  *                 description: (Optional) Recovery Officer ID for filtering.
- *                 example: 10
+ *                 example: 46
  *     responses:
  *       200:
  *         description: Case behavior details retrieved successfully.
@@ -1310,6 +1325,8 @@ router.post("/List_Handling_Cases_By_DRC", listHandlingCasesByDRC);
  *                       example: Internal server error while retrieving case behaviors.
  */
 router.post("/List_Behaviors_Of_Case_During_DRC", listBehaviorsOfCaseDuringDRC);
+
+router.patch("/Update_case_last_Ro_Details", updateLastRoDetails);
 
 // router.post("/List_All_Active_ROs_By_DRC", listAllActiveRosByDRCID);
 
@@ -3305,5 +3322,133 @@ router.post(
   "/Create_task_for_batch_approval",
   Create_task_for_batch_approval
 );
+
+router.post(
+  "/List_DRC_Assign_Manager_Approval",
+  List_DRC_Assign_Manager_Approval
+);
+
+router.post(
+  "/Approve_DRC_Assign_Manager_Approval",
+  Approve_DRC_Assign_Manager_Approval
+);
+
+router.post(
+  "/Reject_DRC_Assign_Manager_Approval",
+  Reject_DRC_Assign_Manager_Approval
+);
+
+router.post(
+  "/Create_task_for_DRC_Assign_Manager_Approval",
+  Create_task_for_DRC_Assign_Manager_Approval
+);
+router.post(
+  "/Assign_DRC_To_Case",
+  Assign_DRC_To_Case
+);
+
+router.post(
+  "/List_Case_Distribution_Details",
+  List_Case_Distribution_Details
+);
+
+router.post(
+  "/Create_Task_For_case_distribution_drc_summery",
+  Create_Task_For_case_distribution_drc_summery
+);
+
+router.post(
+  "/List_Case_Distribution_Details_With_Rtoms",
+  List_Case_Distribution_Details_With_Rtoms
+);
+
+router.post(
+  "/List_CasesOwened_By_DRC",
+  List_CasesOwened_By_DRC
+);
+
+/**
+ * @swagger
+ * /api/case/List_All_DRC_Negotiation_Cases:
+ *   post:
+ *     summary: Retrieve all cases assigned to a specific DRC
+ *     description: |
+ *       Fetches all cases assigned to a DRC within a given date range and optional status filter.
+ *
+ *       | Version | Date        | Description                        | Changed By            |
+ *       |---------|-------------|------------------------------------|-----------------------|
+ *       | 01      | 2024-Feb-03 | Initial API for listing cases     | Vishmi Wijewardana    |
+ *
+ *     tags: [Case Management]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - drc_id
+ *               - ro_id
+ *               - From_DAT
+ *               - TO_DAT
+ *             properties:
+ *               drc_id:
+ *                 type: string
+ *                 description: Unique ID of the DRC.
+ *                 example: "DRC123"
+ *               ro_id:
+ *                 type: string
+ *                 description: Unique ID of the Recovery Officer.
+ *                 example: "RO456"
+ *               From_DAT:
+ *                 type: string
+ *                 format: date
+ *                 description: Start date for filtering cases.
+ *                 example: "2024-01-01"
+ *               TO_DAT:
+ *                 type: string
+ *                 format: date
+ *                 description: End date for filtering cases.
+ *                 example: "2024-01-31"
+ *               case_current_status:
+ *                 type: string
+ *                 description: Case status filter (e.g., Open, Closed, Pending).
+ *                 example: "Open"
+ *     responses:
+ *       200:
+ *         description: List of cases owned by the DRC.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   case_id:
+ *                     type: integer
+ *                     example: 1001
+ *                   drc_id:
+ *                     type: string
+ *                     example: "DRC123"
+ *                   ro_id:
+ *                     type: string
+ *                     example: "RO456"
+ *                   case_details:
+ *                     type: string
+ *                     example: "Loan default case"
+ *                   case_status:
+ *                     type: string
+ *                     example: "Open"
+ *                   assigned_date:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2024-01-15T10:30:00.000Z"
+ *       400:
+ *         description: Bad request - required fields missing or invalid format.
+ *       500:
+ *         description: Internal server error.
+ */
+
+router.post("/List_All_DRC_Negotiation_Cases", listDRCAllCases);
 
 export default router;
