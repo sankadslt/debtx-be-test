@@ -5,16 +5,16 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/Obtain_Nominee:
+ * /api/approval-user:
  *   post:
  *     summary: Get approval user ID
  *     description: |
  *       Retrieve the user_id based on the provided case_phase, approval_type, and billing_center.
- *
- *       | Version | Date        | Description                        | Changed By            |
- *       |---------|-------------|------------------------------------|-----------------------|
- *       | 01      | 2025-Mar-09 | Get approval user id               | Shyamal Warnakula     |
- *
+ *       
+ *       | Version | Date        | Description                         | Changed By            |
+ *       |---------|-------------|-------------------------------------|-----------------------|
+ *       | 01      | 2025-Mar-09 | Get approval user ID               | Shyamal Warnakula     |
+ * 
  *     tags: [Approval Management]
  *     requestBody:
  *       required: true
@@ -47,9 +47,9 @@ const router = express.Router();
  *               type: object
  *               properties:
  *                 user_id:
- *                   type: integer
+ *                   type: string  # Updated to string for MongoDB ObjectId compatibility
  *                   description: The ID of the user assigned for approval.
- *                   example: 123
+ *                   example: "65a2c3d9f1a2b3c4d5e6f7g8"
  *       400:
  *         description: Validation error - Missing required parameters.
  *         content:
@@ -91,19 +91,19 @@ const router = express.Router();
  *                   example: Internal Server Error.
  */
 
-router.post("/Obtain_Nominee", getApprovalUserId);
+router.post("/approval-user", getApprovalUserId);
 
 /**
  * @swagger
-  * /api/Obtain_Batch_Nominee:
- *    post:
- *     summary: Get approval user ID for a batch
+ * /api/batch-approval-user:
+ *   post:
+ *     summary: Get approval user ID for a batch request
  *     description: |
  *       Retrieve a single user_id from a batch request containing multiple case_phase and approval_type pairs.
  *
- *       | Version | Date        | Description                        | Changed By            |
- *       |---------|-------------|------------------------------------|-----------------------|
- *       | 01      | 2025-Mar-09 | Get approval user id for a batch     | Shyamal Warnakula    |
+ *       | Version | Date        | Description                          | Changed By            |
+ *       |---------|-------------|--------------------------------------|-----------------------|
+ *       | 01      | 2025-Mar-09 | Get approval user ID for a batch    | Shyamal Warnakula     |
  *
  *     tags: [Approval Management]
  *     requestBody:
@@ -111,19 +111,21 @@ router.post("/Obtain_Nominee", getApprovalUserId);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - case_phase
- *               - approval_type
- *             properties:
- *               case_phase:
- *                 type: string
- *                 description: The case phase for which the approval user ID is needed.
- *                 example: Phase_1
- *               approval_type:
- *                 type: string
- *                 description: The approval type for which the approval user ID is needed.
- *                 example: Type_A
+ *             type: array
+ *             items:
+ *               type: object
+ *               required:
+ *                 - case_phase
+ *                 - approval_type
+ *               properties:
+ *                 case_phase:
+ *                   type: string
+ *                   description: The case phase for which the approval user ID is needed.
+ *                   example: Phase_1
+ *                 approval_type:
+ *                   type: string
+ *                   description: The approval type for which the approval user ID is needed.
+ *                   example: Type_A
  *     responses:
  *       200:
  *         description: Approval user ID retrieved successfully.
@@ -133,9 +135,9 @@ router.post("/Obtain_Nominee", getApprovalUserId);
  *               type: object
  *               properties:
  *                 user_id:
- *                   type: integer
+ *                   type: string  # Updated to string for MongoDB ObjectId compatibility
  *                   description: The ID of the user assigned for approval.
- *                   example: 123
+ *                   example: "65a2c3d9f1a2b3c4d5e6f7g8"
  *       400:
  *         description: Validation error - Missing required parameters.
  *         content:
@@ -148,7 +150,7 @@ router.post("/Obtain_Nominee", getApprovalUserId);
  *                   example: error
  *                 message:
  *                   type: string
- *                   example: case_phase and approval_type are required.
+ *                   example: Each item must have case_phase and approval_type.
  *       404:
  *         description: No matching record found.
  *         content:
@@ -177,6 +179,6 @@ router.post("/Obtain_Nominee", getApprovalUserId);
  *                   example: Internal Server Error.
  */
 
-router.post("/Obtain_Batch_Nominee", getBatchApprovalUserId);
+router.post("/batch-approval-user", getBatchApprovalUserId);
 
 export default router;
