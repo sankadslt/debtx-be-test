@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/approval-user:
+ * /api/Obtain_Nominee:
  *   post:
  *     summary: Get approval user ID
  *     description: |
@@ -47,7 +47,7 @@ const router = express.Router();
  *               type: object
  *               properties:
  *                 user_id:
- *                   type: string  # Updated to string for MongoDB ObjectId compatibility
+ *                   type: string
  *                   description: The ID of the user assigned for approval.
  *                   example: "65a2c3d9f1a2b3c4d5e6f7g8"
  *       400:
@@ -91,11 +91,11 @@ const router = express.Router();
  *                   example: Internal Server Error.
  */
 
-router.post("/approval-user", getApprovalUserId);
+router.post("/Obtain_Nominee", getApprovalUserId);
 
 /**
  * @swagger
- * /api/batch-approval-user:
+ * /api/Obtain_Batch_Nominee:
  *   post:
  *     summary: Get approval user ID for a batch request
  *     description: |
@@ -135,7 +135,7 @@ router.post("/approval-user", getApprovalUserId);
  *               type: object
  *               properties:
  *                 user_id:
- *                   type: string  # Updated to string for MongoDB ObjectId compatibility
+ *                   type: string
  *                   description: The ID of the user assigned for approval.
  *                   example: "65a2c3d9f1a2b3c4d5e6f7g8"
  *       400:
@@ -179,6 +179,6 @@ router.post("/approval-user", getApprovalUserId);
  *                   example: Internal Server Error.
  */
 
-router.post("/batch-approval-user", getBatchApprovalUserId);
+router.post("/Obtain_Batch_Nominee", getBatchApprovalUserId);
 
 export default router;
